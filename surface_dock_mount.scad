@@ -19,8 +19,10 @@ wall_thickness = 2;
 side_notch_tall = 40;
 side_notch_width = 9;
 
-bhw = 45;
-bhd = 10;
+bh_end = 3;
+bhw = 120;
+bhw = mw - (2*bh_end);
+bhd = 25;
 
 screw_size = 5;
 
@@ -55,6 +57,20 @@ module bottomHole() {
     translate([bhw-(bhd/2), bhd/2, 0]) cylinder(wall_thickness+1, d=bhd);
 }
 
+
+module bottomHole2() {
+    minkowski() {
+    
+        linear_extrude(wall_thickness + 1) {
+            translate([bhd/2, bhd/2, 0]) circle(d=bhd);
+            translate([bhd/2, 0, 0]) square([bhw-bhd, bhd]);
+            translate([bhw-(bhd/2), bhd/2, 0]) circle(d=bhd);
+        }
+        rotate_extrude()polygon([ [0,0] , [4, -8], [0, -8] ]);
+    }
+}
+
+
 module screwTab() {
     tx = 18;
     ty = 30;
@@ -88,17 +104,22 @@ module thing() {
     // housing body, shifted to accomodate screw tabs
     translate([18,0,0]) {
         difference() {
+            
+            /* */
             mainBody();
             
             translate([0,wall_thickness+(md/2)-(side_notch_width/2),(mh+wall_thickness)-side_notch_tall])
+                sideNotch(10, side_notch_tall);
+            
+            translate([mw + wall_thickness - 1,(wall_thickness+(md/2)-(side_notch_width/2)),(mh+wall_thickness)-side_notch_tall])
                 sideNotch(10, side_notch_tall);
             /*
             translate([wall_thickness+mw/2,-(md/2),0])
                 bottomNotch();
             */
-            
-            translate([mw-bhw-5,(md/2)-wall_thickness,0])
-                bottomHole();
+            bottom_hole_shift = (md/2) - (bhd/2) + wall_thickness;
+            translate([(mw+wall_thickness)-bhw-bh_end,bottom_hole_shift,0])
+                bottomHole2();
             
             
             rotate([90,0,0])
